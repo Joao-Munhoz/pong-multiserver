@@ -9,6 +9,8 @@
 #include <cstring>
 #include <string>
 
+#define MAX_CONNECTIONS 6
+
 struct Paddles {
 	Paddle *paddle;
 	int id;
@@ -18,12 +20,22 @@ struct Paddles {
 struct ServerToClient {
 	int xAxis;
 	int yAxis;
-	struct Paddle * paddles;
+	struct Paddle paddles[MAX_CONNECTIONS];
 };
 
 struct ClientToServer {
 	int id;
 	int positionPaddle;
+};
+
+struct Connections {
+	struct sockaddr_in client, myself;
+	struct ServerToClient dataServer;
+	struct ClientToServer dataClient;
+	int socketFd, running;
+	int connectionFd[MAX_CONNECTIONS];
+	int usedConnection[MAX_CONNECTIONS];
+	socklen_t clientSize;
 };
 
 struct DataScreen {
@@ -47,21 +59,38 @@ class RelevantData {
 
 class Transmission {
 	private:
-		int socket_fd, connection_fd;
-		struct sockaddr_in myself, client;
-		bool socket_status, transmissionRunning;
-		RelevantData *data;
-		std::thread kb_thread;
-		char * string;
+		struct Connections connections;
+
+		//Status of transmission
+		bool socketStatus;
+
+		//Threads
+		std::thread kbThread;
+
+		pthread_t esperar_conexoes;
+	  int msglen;
+	  int user_iterator;
+
+	  //Data in struct format
+	  RelevantData *data;
+
+	  //Strings to transmit serialized data
+	  char output_buffer[60];
+	  char input_buffer[50];
+
 
 	public:
 		Transmission();
-		void threadTransmission();
-		bool getSocketStatus();
-		bool getTransmissionStatus();
+		//void threadTransmission();
 		DataScreen getDataScreen();
 		void update(Ball *ball, int displacement);
 		void stop();
+
+		void *waitConnections();
+		int addConnection(int newConnectionFD);
+		int removeConnection(int user);
+		bool getSocketStatus();
+
 };
 
 #endif
