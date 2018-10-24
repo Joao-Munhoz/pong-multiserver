@@ -6,47 +6,53 @@
 #include <stdlib.h>
 #include <cstring>
 #include <string>
-#include "model_client.hpp"
+
+#include "transmission_client.hpp"
 
 using namespace std::chrono;
 
 Transmission::Transmission(){
 
-	data = new RelevantData((int)(SCREEN_HEIGHT/2),(int)(SCREEN_WIDTH/2), 0);
-	socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-
+	//Start connection's configuration
+	socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	target.sin_family = AF_INET;
 	target.sin_port = htons(3001);
 	inet_aton("127.0.0.1", &(target.sin_addr));
-	if (connect(socket_fd, (struct sockaddr*)&target, sizeof(target)) != 0) {         
-		socket_status = false;
-	} else {
-		socket_status = true;
-		transmissionRunning = true;
-		std::thread newthread(&Transmission::threadTransmission, this);
-		kb_thread.swap(newthread);
+
+	//Open door
+	if (connect(socketFd, (struct sockaddr*)&target, sizeof(target)) != 0) {         
+		socketStatus = false;
+		return;
 	}
+	std::cout << "Connection Established!" << '\n';
+	running =1;
+	socketStatus = true;
+
+	//Thread to transmit data
+	transmissionRunning = true;
+	std::thread newthread(&Transmission::initTransmission, this);
+	kb_thread.swap(newthread);
 }
 
-bool Transmission::getSocketStatus(){
-	return this->socket_status;
-}
-
-bool Transmission::getTransmissionStatus(){
-	return this->transmissionRunning;
-}
-
-void Transmission::threadTransmission(){
+void Transmission::initTransmission(){
 
 	string = new char[sizeof(DataScreen)];
 	
 	while(1){ 
-		recv(socket_fd, string, sizeof(DataScreen), 0);
+		recv(socketFd, string, sizeof(DataScreen), 0);
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		data->unserialize(string);
 	}
 	this->transmissionRunning = false;
 	return;
+}
+
+bool Transmission::getSocketStatus(){
+	return this->socketStatus;
+}
+
+bool Transmission::getTransmissionStatus(){
+	return this->transmissionRunning;
 }
 
 DataScreen Transmission::getDataScreen(){
@@ -55,7 +61,7 @@ DataScreen Transmission::getDataScreen(){
 
 void Transmission::stop(){
 	kb_thread.join();
-	close(socket_fd);
+	close(socketFd);
 	return;
 }
 

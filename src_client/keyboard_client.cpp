@@ -9,14 +9,14 @@
 using namespace std::chrono;
 
 /*
-class Teclado {
+class Keyboard {
 	private:
 		char ultima_captura;
 		int rodando;
 
 	public:
-		Teclado();
-		~Teclado();
+		Keyboard();
+		~Keyboard();
 		void stop();
 		void init();
 		char getchar();
@@ -36,13 +36,13 @@ void threadfun (char *keybuffer, int *control)
 	return;
 }
 
-Teclado::Teclado() {
+Keyboard::Keyboard() {
 }
 
-Teclado::~Teclado() {
+Keyboard::~Keyboard() {
 }
 
-void Teclado::init() {
+void Keyboard::init() {
 	
 	// Inicializa ncurses
 	raw();				          		/* Line buffering disabled	*/
@@ -56,13 +56,13 @@ void Teclado::init() {
 	(this->kb_thread).swap(newthread);
 }
 
-void Teclado::stop() {
+void Keyboard::stop() {
 	this->rodando = 0;
 	(this->kb_thread).join();
 	endwin();
 }
 
-char Teclado::getchar() {
+char Keyboard::getchar() {
 	char c = this->ultima_captura;
 	this->ultima_captura = 0;
 	return c;

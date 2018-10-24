@@ -3,11 +3,6 @@
 
 #include <thread>
 #include <fstream>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <string.h>
 
 //Screen Size
@@ -89,7 +84,7 @@ public:
 
 void threadfun (char *keybuffer, int *control);
 
-class Teclado {
+class Keyboard {
 private:
 	char ultima_captura;
 	int rodando;
@@ -97,47 +92,11 @@ private:
 	std::thread kb_thread;
 
 public:
-	Teclado();
-	~Teclado();
+	Keyboard();
+	~Keyboard();
 	void stop();
 	void init();
 	char getchar();
-};
-
-struct DataScreen {
-	int xAxis;
-	int yAxis;
-	int displacementPaddle;
-};
-
-class RelevantData {
-private:
-	DataScreen data;
-
-public:
-	RelevantData(int xAxis, int yAxis, int displacementPaddle);
-	RelevantData(char *string);
-	void serialize(char *string);
-	void unserialize(char *string);
-	DataScreen getData();
-};
-
-class Transmission {
-private:
-	int socket_fd;
-	struct sockaddr_in target;
-	bool socket_status, transmissionRunning;
-	RelevantData *data;
-	std::thread kb_thread;
-	char * string;
-
-public:
-	Transmission();
-	void threadTransmission();
-	bool getSocketStatus();
-	bool getTransmissionStatus();
-	DataScreen getDataScreen();
-	void stop();
 };
 
 #endif

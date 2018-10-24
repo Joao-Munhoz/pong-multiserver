@@ -12,20 +12,16 @@
 #define MAX_CONNECTIONS 6
 
 struct Paddles {
-	Paddle *paddle;
 	int id;
-	int positionPaddles;
+	int position;
 };
 
-struct ServerToClient {
+struct Data {
 	int xAxis;
 	int yAxis;
-	struct Paddle paddles[MAX_CONNECTIONS];
-};
-
-struct ClientToServer {
-	int id;
-	int positionPaddle;
+	int scoreTeam1;
+	int scoreTeam2;
+	struct Paddles paddles[MAX_CONNECTIONS];
 };
 
 struct Connections {
@@ -38,27 +34,10 @@ struct Connections {
 	socklen_t clientSize;
 };
 
-struct DataScreen {
-	int xAxis;
-	int yAxis;
-	int displacementPaddle; 
-};
-
-class RelevantData {
-	private:
-		DataScreen data;
-
-	public:
-		RelevantData(int xAxis, int yAxis, int displacementPaddle);
-		RelevantData(char *string);
-		void serialize(char *string);
-		void unserialize(char *string);
-		DataScreen getData();
-		void setData(int x, int y, int displacement);
-};
-
 class Transmission {
 	private:
+
+		//Connection
 		struct Connections connections;
 
 		//Status of transmission
@@ -67,10 +46,6 @@ class Transmission {
 		//Threads
 		std::thread kbThread;
 
-		pthread_t esperar_conexoes;
-	  int msglen;
-	  int user_iterator;
-
 	  //Data in struct format
 	  RelevantData *data;
 
@@ -78,18 +53,33 @@ class Transmission {
 	  char output_buffer[60];
 	  char input_buffer[50];
 
+	  //Structure data
+	  Data data;
+
+	  pthread_t esperar_conexoes;
+	  int msglen;
+	  int user_iterator;
 
 	public:
-		Transmission();
-		//void threadTransmission();
-		DataScreen getDataScreen();
-		void update(Ball *ball, int displacement);
-		void stop();
 
+		//Constructor
+		Transmission();
+
+		//Establish connection
+		void initTransmission();
 		void *waitConnections();
 		int addConnection(int newConnectionFD);
 		int removeConnection(int user);
 		bool getSocketStatus();
+
+		//Manipulate data	
+		void serialize(char *inputBuffer);
+		void unserialize(char *outputBuffer);
+		Data getData();
+		void updateData();
+
+		//End connection
+		void stop();
 
 };
 

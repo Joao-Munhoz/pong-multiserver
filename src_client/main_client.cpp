@@ -33,14 +33,20 @@ int main(){
 	Paddle *paddle = new Paddle();
 	paddle->init();
 	Screen *screen = new Screen(ball, paddle, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH);
+	Keyboard *keyboard = new Keyboard();
 	Transmission *transmission = new Transmission();
 	if(transmission->getSocketStatus() == false){
 		return 1;
 	}
-  	screen->init();
+	//transmission->init();
+
+	while(1){}
+
+  	/*screen->init();
 	screen->draw();
 
 	while(transmission->getTransmissionStatus()){
+		keyboard->getchar()
 		DataScreen data = transmission->getDataScreen();
 		ball->update(data.xAxis, data.yAxis, 0, 0);
 		paddle->update(data.displacementPaddle);
@@ -51,5 +57,6 @@ int main(){
 
 	transmission->stop();
 	screen->stop();
+	*/
 	return 1;
 }

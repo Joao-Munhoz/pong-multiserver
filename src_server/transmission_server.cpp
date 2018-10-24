@@ -20,7 +20,7 @@ Transmission::Transmission() {
 	}
 	connections.running = 1;
 
-	//Star configuration on connection
+	//Start connection's configuration
 	connections.socketFd = socket(AF_INET, SOCK_STREAM, 0);  
 	connections.myself.sin_family = AF_INET;              
 	connections.myself.sin_port = htons(3001);
@@ -50,7 +50,7 @@ void *Transmission::waitConnections() {
 
 	//Waiting to add new connections
 	while(connections.running) {
-		connFD = accept(connections.socketFd, (struct sockaddr*)&connections.client, &connections.clientSize);
+		connFD = accept(connections.socketFd, (struct sockaddr*)&(connections.client), &(connections.clientSize));
 		userID = addConnection(connFD);
 		if(userID != -1) {
 			std::cout << "New user! ID = " << userID << '\n'; 
@@ -64,7 +64,7 @@ int Transmission::addConnection(int newConnectionFD) {
 		if(connections.usedConnection[i] == 0) {
 			connections.usedConnection[i] = 1;
 			connections.connectionFd[i] = newConnectionFD;
-			return 1;
+			return i;
 		}
 	}
 	return -1;
@@ -79,22 +79,8 @@ int Transmission::removeConnection(int user) {
 	return 1;
 }
 
-bool Transmission::getSocketStatus() {
-	return this->socketStatus;
-}
-
-
-
-
-
-
-
-
-
-/*void Transmission::threadTransmission(){
-
+void Transmission::initTransmission(){
 	string = new char[sizeof(DataScreen)];
-
 	while (1) {
 		data->serialize(string);
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -102,41 +88,31 @@ bool Transmission::getSocketStatus() {
 	}
 	return;
 }
-*/
 
-DataScreen Transmission::getDataScreen(){
-	return (this->data)->getData();
+bool Transmission::getSocketStatus() {
+	return this->socketStatus;
 }
 
-void Transmission::update(Ball *ball, int displacement){
-	data->setData(ball->get_xAxis(), ball->get_yAxis(), displacement);
+void Transmission::serialize(char *inputBuffer) {
+	std::memcpy((void*)inputBuffer, &(this->data), sizeof(Data));
+}
+
+void Transmission::unserialize(char *outputBuffer) {
+	std::memcpy(&(this->data), (void*)outputBuffer, sizeof(Data));
+}
+
+Data Transmission::getData(){
+	return data;
+}
+
+void Transmission::updateData(struct Data newData){
+	data.xAxis = newData.xAxis;
+	data.yAxis = newData.yAxis;
+	data.scoreTeam1 = newData.scoreTeam1;
+	data.scoreTeam2 = newData.scoreTeam2;
 }
 
 void Transmission::stop(){
 	(this->kbThread).join();
 	return;
-}
-
-RelevantData::RelevantData(int X, int Y, int B) {
-	this->data.xAxis = X;
-	this->data.yAxis = Y;
-	this->data.displacementPaddle = B;
-}
-
-void RelevantData::serialize(char *string) {
-	std::memcpy((void*)string, &(this->data), sizeof(DataScreen));
-}
-
-void RelevantData::unserialize(char *string) {
-	std::memcpy(&(this->data), (void*)string, sizeof(DataScreen));
-}
-
-DataScreen RelevantData::getData() {
-	return this->data;
-}
-
-void RelevantData::setData(int x, int y, int displacement) {
-	data.xAxis = x;
-	data.yAxis = y;
-	data.displacementPaddle = displacement;
 }
