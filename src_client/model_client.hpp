@@ -11,12 +11,12 @@
 #define MARGIN 		  2
 
 //Velocity and Size of Bar
-#define HALF_BAR      5
-#define VEL_BAR       4
+#define SIZE_PADDLE		10
+#define HALF_BAR      	5
+#define VEL_BAR       	4
 
 //Initial and Increase Velocity
-#define INI_BALL_VELOCITY      0
-#define INCREASE_BALL_VELOCITY 1.005
+#define BALL_VELOCITY      5
 
 #define POINTS_WIN  40
 
@@ -34,6 +34,7 @@ private:
 public:
 	Ball(float velocityX, float velocityY, float xAxis, float yAxis);
 	void update(float new_posX, float new_posY, float new_velX, float new_velY);
+	void update(float xAxis, float yAxis);
 	float get_velocityX();
 	float get_velocityY();
 	float get_xAxis();
@@ -79,6 +80,7 @@ public:
 	void init();
 	void draw();
 	void update();
+
 	void end_game(std::string &s);
 };
 

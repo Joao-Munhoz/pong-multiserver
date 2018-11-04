@@ -13,32 +13,26 @@
 
 struct Paddles {
 	int id;
-	int position;
+	int position[SIZE_PADDLE];
 };
 
 struct Data {
-	int xAxis;
-	int yAxis;
-	int scoreTeam1;
-	int scoreTeam2;
+	float xAxis;
+	float yAxis;
+	int positionPaddle[SIZE_PADDLE];
 	struct Paddles paddles[MAX_CONNECTIONS];
-};
-
-struct Connections {
-	struct sockaddr_in client, myself;
-	struct ServerToClient dataServer;
-	struct ClientToServer dataClient;
-	int socketFd, running;
-	int connectionFd[MAX_CONNECTIONS];
-	int usedConnection[MAX_CONNECTIONS];
-	socklen_t clientSize;
+	int running;
 };
 
 class Transmission {
 	private:
 
 		//Connection
-		struct Connections connections;
+		struct sockaddr_in client, myself;
+		int socketFd, running;
+		int connectionFd[MAX_CONNECTIONS];
+		int usedConnection[MAX_CONNECTIONS];
+		socklen_t clientSize;
 
 		//Status of transmission
 		bool socketStatus;
@@ -46,19 +40,16 @@ class Transmission {
 		//Threads
 		std::thread kbThread;
 
-	  //Data in struct format
-	  RelevantData *data;
+		//Data in struct format
+		Data data;
 
-	  //Strings to transmit serialized data
-	  char output_buffer[60];
-	  char input_buffer[50];
+		//Strings to transmit serialized data
+		char outputBuffer[120];
+		char inputBuffer[120];
 
-	  //Structure data
-	  Data data;
-
-	  pthread_t esperar_conexoes;
-	  int msglen;
-	  int user_iterator;
+		pthread_t esperar_conexoes;
+		int msglen;
+		int user_iterator;
 
 	public:
 
@@ -66,8 +57,9 @@ class Transmission {
 		Transmission();
 
 		//Establish connection
-		void initTransmission();
-		void *waitConnections();
+		void init();
+		void threadTransmission();
+		void waitConnections();
 		int addConnection(int newConnectionFD);
 		int removeConnection(int user);
 		bool getSocketStatus();
@@ -76,7 +68,9 @@ class Transmission {
 		void serialize(char *inputBuffer);
 		void unserialize(char *outputBuffer);
 		Data getData();
-		void updateData();
+		void updateBall(float xAxis, float yAxis);
+		void updatePaddle(int id, int *positionPaddle);
+		void updatePaddle(int id);
 
 		//End connection
 		void stop();

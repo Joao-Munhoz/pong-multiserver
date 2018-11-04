@@ -9,13 +9,13 @@
 #define SCREEN_HEIGHT 20
 #define MARGIN 		  2
 
-//Velocity and Size of Bar
-#define HALF_BAR      5
-#define VEL_BAR       4
+//Velocity and Size of Paddle
+#define SIZE_PADDLE			10
+#define VELOCITY_PADDLE		4
 
 //Initial and Increase Velocity
-#define INI_BALL_VELOCITY      5
-#define INCREASE_BALL_VELOCITY 1.005
+#define BALL_VELOCITY		5
+#define INCREASE_VELOCITY	1.005
 
 #define POINTS_WIN  40
 
@@ -29,8 +29,6 @@ class Ball {
 		float velocityY;
 		float xAxis;
 		float yAxis;
-		int points;
-		int seconds;
 
 	public:
 		Ball(float velocityX, float velocityY, float xAxis, float yAxis);
@@ -39,30 +37,6 @@ class Ball {
 		float get_velocityY();
 		float get_xAxis();
 		float get_yAxis();
-};
-
-class Particle {
-	private:
-		int position;
-		char iconPaddle;
-
-	public:
-		Particle(int position);
-		void update(int nova_position);
-		int get_position();
-		char get_char();
-};
-
-class Paddle {
- private:
-		std::vector<Particle*> *particles;
-
-	public:
-		Paddle();
-		void hard_copy(Paddle *ldc);
-		void update(int displacement);
-		void init();
-		std::vector<Particle*> *get_particles();
 };
 
 class Physics {

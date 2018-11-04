@@ -23,6 +23,11 @@ void Ball::update(float new_posX, float new_posY, float new_velX, float new_velY
 	this->velocityY = new_velY;
 }
 
+void Ball::update(float xAxis, float yAxis){
+	this->xAxis = xAxis;
+	this->yAxis = yAxis;
+}
+
 float Ball::get_velocityX() {
 	return this->velocityX;
 }

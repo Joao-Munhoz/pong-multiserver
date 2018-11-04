@@ -38,49 +38,6 @@ float Ball::get_yAxis() {
 	return this->yAxis;
 }
 
-Particle::Particle(int position) {
-	this->position = position;
-	this->iconPaddle = '_';
-}
-
-int Particle::get_position(){
-	return this->position;
-}
-void Particle::update(int position){
-	this->position = position;
-}
-
-Paddle::Paddle() {
-	this->particles = new std::vector<Particle *>(0);
-}
-
-void Paddle::init() {
-	int position = (int)(SCREEN_WIDTH/2) - HALF_BAR;
-	for (int i = -(HALF_BAR); i <= HALF_BAR; ++i){
-		(this->particles)->push_back(new Particle(position));
-		position++;
-	}
-}
-
-void Paddle::update(int displacement) {
-	for(int i = 0; i < particles->size(); i++){
-		((*(this->particles))[i])->update(((*(this->particles))[i])->get_position() + displacement);
-	}
-}
-
-std::vector<Particle*> *Paddle::get_particles() {
-	return (this->particles);
-}
-
-void Paddle::hard_copy(Paddle *ldc) {
-	std::vector<Particle *> *particles = ldc->get_particles();
-
-	for (int k = 0; k < particles->size(); k++) {
-		Particle *c = new Particle( (*particles)[k]->get_position());
-		(this->particles)->push_back(c);
-	}
-}
-
 Physics::Physics(Ball *ball) {
 	this->ball = ball;
 }

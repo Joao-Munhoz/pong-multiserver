@@ -7,7 +7,9 @@
 #include <cstring>
 #include <string>
 
+#include "model_client.hpp"
 #include "transmission_client.hpp"
+
 
 using namespace std::chrono;
 
@@ -27,23 +29,25 @@ Transmission::Transmission(){
 	std::cout << "Connection Established!" << '\n';
 	running =1;
 	socketStatus = true;
-
-	//Thread to transmit data
-	transmissionRunning = true;
-	std::thread newthread(&Transmission::initTransmission, this);
-	kb_thread.swap(newthread);
 }
 
-void Transmission::initTransmission(){
+void Transmission::init(){
+	//Thread to transmit data
+	transmissionRunning = true;
+	std::thread newthread(&Transmission::threadTransmission, this);
+	kbThread.swap(newthread);
+}
 
-	string = new char[sizeof(DataScreen)];
+void Transmission::threadTransmission(){
 	
 	while(1){ 
-		recv(socketFd, string, sizeof(DataScreen), 0);
+		recv(socketFd, inputBuffer, 60, 0);
+		unserialize(inputBuffer);
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		data->unserialize(string);
+		serialize(outputBuffer);
+		send(socketFd, outputBuffer, 60, 0);
 	}
-	this->transmissionRunning = false;
+	transmissionRunning = false;
 	return;
 }
 
@@ -51,34 +55,28 @@ bool Transmission::getSocketStatus(){
 	return this->socketStatus;
 }
 
-bool Transmission::getTransmissionStatus(){
-	return this->transmissionRunning;
+Data Transmission::getData(){
+	return this->data;
 }
 
-DataScreen Transmission::getDataScreen(){
-	return (this->data)->getData();
+void Transmission::updatePaddle(int *positionPaddle){
+	for (int i = 0; i < SIZE_PADDLE; ++i){
+		data.positionPaddle[i] = positionPaddle[i];
+	}
+	return ;
+}
+
+void Transmission::serialize(char *inputBuffer) {
+	std::memcpy((void*)inputBuffer, &(this->data), sizeof(Data));
+}
+
+void Transmission::unserialize(char *outputBuffer) {
+	std::memcpy(&(this->data), (void*)outputBuffer, sizeof(Data));
 }
 
 void Transmission::stop(){
-	kb_thread.join();
+	data.running = 0;
+	kbThread.join();
 	close(socketFd);
 	return;
-}
-
-RelevantData::RelevantData(int X, int Y, int displacement) {
-	this->data.xAxis = X;
-	this->data.yAxis = Y;
-	this->data.displacementPaddle = displacement;
-}
-
-void RelevantData::serialize(char *string) {
-	std::memcpy((void*)string, &(this->data), sizeof(DataScreen));
-}
-
-void RelevantData::unserialize(char *string) {
-	std::memcpy(&(this->data), (void*)string, sizeof(DataScreen));
-}
-
-DataScreen RelevantData::getData(){
-	return this->data;
 }

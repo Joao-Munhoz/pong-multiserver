@@ -31,7 +31,6 @@ class Player {
 	PaError             err;
 	PaTime              streamOpened;
 
-
   public:
 	Player();
 	~Player();

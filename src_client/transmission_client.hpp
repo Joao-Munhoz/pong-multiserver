@@ -9,17 +9,21 @@
 #include <cstring>
 #include <string>
 
+#define MAX_CONNECTIONS 6
+
 struct Paddles {
 	int id;
-	int positionPaddles[MAX_CONNECTIONS];
+	int position[SIZE_PADDLE];
 };
 
 struct Data {
-	int xAxis;
-	int yAxis;
+	float xAxis;
+	float yAxis;
 	int scoreTeam1;
 	int scoreTeam2;
-	struct Paddles paddles;
+	int positionPaddle[SIZE_PADDLE];
+	struct Paddles paddles[MAX_CONNECTIONS];
+	int running;
 };
 
 class Transmission {
@@ -36,22 +40,29 @@ private:
 	std::thread kbThread;
 
 	//Data in struct format
-	RelevantData *data;
+	Data data;
 
 	//Strings to transmit serialized data
-	char output_buffer[60];
-	char input_buffer[50];
+	char outputBuffer[60];
+	char inputBuffer[50];
 
 public:
+
+	//Constructor
 	Transmission();
-	void initTransmission();
+
+	//Establish connection
+	void init();
+	void threadTransmission();
 	bool getSocketStatus();
-	bool getTransmissionStatus();
-	DataScreen getDataScreen();
+
+	//Manipulate Data
+	Data getData();
 	void serialize(char *input_buffer);
 	void unserialize(char *output_buffer);
-	Data getData();
-	void setData();
+	void updatePaddle(int *position);
+
+	//End connection
 	void stop();
 };
 

@@ -14,20 +14,20 @@ using namespace std::chrono;
 Transmission::Transmission() {
 
 	//Start variables
-	connections.clientSize = (socklen_t)sizeof(connections.client);
+	clientSize = (socklen_t)sizeof(client);
 	for(int i = 0; i < MAX_CONNECTIONS; i++) {
-		connections.usedConnection[i] = 0;
+		usedConnection[i] = 0;
 	}
-	connections.running = 1;
+	running = 1;
 
 	//Start connection's configuration
-	connections.socketFd = socket(AF_INET, SOCK_STREAM, 0);  
-	connections.myself.sin_family = AF_INET;              
-	connections.myself.sin_port = htons(3001);
-	inet_aton("127.0.0.1", &(connections.myself.sin_addr));
+	socketFd = socket(AF_INET, SOCK_STREAM, 0);  
+	myself.sin_family = AF_INET;              
+	myself.sin_port = htons(3001);
+	inet_aton("127.0.0.1", &(myself.sin_addr));
 
 	//Open door
-	if (bind(connections.socketFd, (struct sockaddr*)&connections.myself, sizeof(connections.myself)) != 0) {
+	if (bind(socketFd, (struct sockaddr*)&myself, sizeof(myself)) != 0) {
 		socketStatus = false;
 		return;
 	}
@@ -35,35 +35,31 @@ Transmission::Transmission() {
 	socketStatus = true;
 
 	//Receive data in this door
-	listen(connections.socketFd, 2);                 
-	
-	//Thread to listen connections
-	std::thread newthread(&Transmission::waitConnections, this);
-	kbThread.swap(newthread);
+	listen(socketFd, 2);
 }
 
-void *Transmission::waitConnections() {
+void Transmission::waitConnections() {
 	int connFD;
 	int userID;
 
 	std::cout << "Searching..." << '\n';
 
 	//Waiting to add new connections
-	while(connections.running) {
-		connFD = accept(connections.socketFd, (struct sockaddr*)&(connections.client), &(connections.clientSize));
+	while(running) {
+		connFD = accept(socketFd, (struct sockaddr*)&(client), &(clientSize));
 		userID = addConnection(connFD);
 		if(userID != -1) {
 			std::cout << "New user! ID = " << userID << '\n'; 
 		}
 	}
-	return NULL;
+	return;
 }
 
 int Transmission::addConnection(int newConnectionFD) {
 	for(int i = 0; i < MAX_CONNECTIONS; i++) {
-		if(connections.usedConnection[i] == 0) {
-			connections.usedConnection[i] = 1;
-			connections.connectionFd[i] = newConnectionFD;
+		if(usedConnection[i] == 0) {
+			usedConnection[i] = 1;
+			connectionFd[i] = newConnectionFD;
 			return i;
 		}
 	}
@@ -71,20 +67,33 @@ int Transmission::addConnection(int newConnectionFD) {
 }
 
 int Transmission::removeConnection(int user) {
-	if(connections.usedConnection[user] == 1) {
-		connections.usedConnection[user] = 0;
-		close(connections.connectionFd[user]);
+	if(usedConnection[user] == 1) {
+		usedConnection[user] = 0;
+		close(connectionFd[user]);
 		std::cout << "User removed!" << '\n';
 	}
 	return 1;
 }
 
-void Transmission::initTransmission(){
-	string = new char[sizeof(DataScreen)];
+void Transmission::init(){
+	std::thread newthread(&Transmission::threadTransmission, this);
+	kbThread.swap(newthread);	
+}
+
+void Transmission::threadTransmission(){
 	while (1) {
-		data->serialize(string);
+		serialize(inputBuffer);
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		send(connection_fd, string, sizeof(DataScreen), 0);
+		for(int i = 0; i  < MAX_CONNECTIONS; i++){
+			send(connectionFd[i], inputBuffer, 120, 0);
+			msglen = recv(connectionFd[i], outputBuffer, 120, 0);
+			if(msglen < 0){
+				removeConnection(i);
+				this->updatePaddle(i);
+			}
+			unserialize(outputBuffer);
+			this->updatePaddle(i, data.positionPaddle);
+		}
 	}
 	return;
 }
@@ -102,17 +111,31 @@ void Transmission::unserialize(char *outputBuffer) {
 }
 
 Data Transmission::getData(){
-	return data;
+	return this->data;
 }
 
-void Transmission::updateData(struct Data newData){
-	data.xAxis = newData.xAxis;
-	data.yAxis = newData.yAxis;
-	data.scoreTeam1 = newData.scoreTeam1;
-	data.scoreTeam2 = newData.scoreTeam2;
+void Transmission::updateBall(float xAxis, float yAxis){
+	data.xAxis = xAxis;
+	data.yAxis = yAxis;
+	return;
+}
+
+void Transmission::updatePaddle(int id, int *positionPaddle){
+	for (int i = 0; i < SIZE_PADDLE; ++i){
+		data.paddles[id].position[i] = positionPaddle[i];
+	}
+}
+
+void Transmission::updatePaddle(int id){
+	for (int i = 0; i < SIZE_PADDLE; ++i){
+		data.paddles[id].position[i] = -1;
+	}
 }
 
 void Transmission::stop(){
+	for(int i = 0; i < MAX_CONNECTIONS; i++){
+		this->removeConnection(i);
+	}
 	(this->kbThread).join();
 	return;
 }

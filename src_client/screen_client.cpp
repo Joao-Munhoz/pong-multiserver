@@ -102,6 +102,8 @@ void Screen::update() {
 	refresh();
 }
 
+//void Screen::updatePaddles();
+
 void Screen::end_game(std::string &s){
 	clear();
 	move((int)(SCREEN_HEIGHT/2), (int)(SCREEN_WIDTH/2) - (int)s.length()/2);
