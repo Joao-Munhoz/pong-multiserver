@@ -30,7 +30,7 @@ class Player {
 	PaStream*           stream;
 	PaError             err;
 	PaTime              streamOpened;
-
+	
   public:
 	Player();
 	~Player();

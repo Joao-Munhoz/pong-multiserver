@@ -41,17 +41,20 @@ Transmission::Transmission() {
 void Transmission::waitConnections() {
 	int connFD;
 	int userID;
+	int numberConnections = 0;
 
 	std::cout << "Searching..." << '\n';
 
 	//Waiting to add new connections
-	while(running) {
+	while(numberConnections != MAX_CONNECTIONS) {
 		connFD = accept(socketFd, (struct sockaddr*)&(client), &(clientSize));
 		userID = addConnection(connFD);
 		if(userID != -1) {
 			std::cout << "New user! ID = " << userID << '\n'; 
 		}
+		numberConnections++;
 	}
+	std::cout << "Players connected!" << '\n';
 	return;
 }
 
@@ -81,17 +84,20 @@ void Transmission::init(){
 }
 
 void Transmission::threadTransmission(){
-	while (1) {
-		serialize(inputBuffer);
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	std::cout << "Communicating with clients..." << '\n';
+	while (1) {	
+		std:: cout << "xAxis: " << data.xAxis << " - yAxis: " << data.yAxis << '\n';
 		for(int i = 0; i  < MAX_CONNECTIONS; i++){
+			serialize(inputBuffer);
 			send(connectionFd[i], inputBuffer, 120, 0);
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			msglen = recv(connectionFd[i], outputBuffer, 120, 0);
 			if(msglen < 0){
 				removeConnection(i);
 				this->updatePaddle(i);
 			}
 			unserialize(outputBuffer);
+			exchange();
 			this->updatePaddle(i, data.positionPaddle);
 		}
 	}
@@ -107,7 +113,14 @@ void Transmission::serialize(char *inputBuffer) {
 }
 
 void Transmission::unserialize(char *outputBuffer) {
-	std::memcpy(&(this->data), (void*)outputBuffer, sizeof(Data));
+	std::memcpy(&(this->newData), (void*)outputBuffer, sizeof(Data));
+}
+
+void Transmission::exchange(){
+	for (int i = 0; i < MAX_CONNECTIONS; ++i){
+		data.positionPaddle[i] = newData.positionPaddle[i];
+		data.paddles[i] = newData.paddles[i];
+	}
 }
 
 Data Transmission::getData(){

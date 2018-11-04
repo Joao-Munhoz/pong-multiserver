@@ -53,7 +53,7 @@ void Physics::update(float deltaT) {
 	/*if(ball->get_points()%5 == 0 && ball->get_points() != 0){
 		new_velY = new_velY * INCREASE_BALL_VELOCITY;
 		new_velX = new_velX * INCREASE_BALL_VELOCITY;
-	}*/
+	}
 
 	if(updateBall->get_yAxis() > SCREEN_WIDTH - MARGIN || updateBall->get_yAxis() < MARGIN){
 		new_velY = (-1)*new_velY;
@@ -61,13 +61,14 @@ void Physics::update(float deltaT) {
 
 	if(updateBall->get_xAxis() < MARGIN){
 		new_velX = (-1)*new_velX;
-	}
+	}*/
 
 	float new_posX = updateBall->get_xAxis() + new_velX*deltaT/1000;
 	float new_posY = updateBall->get_yAxis() + new_velY*deltaT/1000;
 	
 	updateBall->update(new_posX, new_posY, new_velX, new_velY);
 }
+
 /*
 int Physics::choque(Ball *ball, Paddle *barra) {
 	// Atualiza parametros dos corpos!

@@ -43,8 +43,8 @@ private:
 	Data data;
 
 	//Strings to transmit serialized data
-	char outputBuffer[60];
-	char inputBuffer[50];
+	char outputBuffer[120];
+	char inputBuffer[120];
 
 public:
 

@@ -27,7 +27,7 @@ Transmission::Transmission(){
 		return;
 	}
 	std::cout << "Connection Established!" << '\n';
-	running =1;
+	running = 1;
 	socketStatus = true;
 }
 
@@ -40,12 +40,19 @@ void Transmission::init(){
 
 void Transmission::threadTransmission(){
 	
+	std::cout << "Communicating with server..." << '\n';
+	int msglen;
 	while(1){ 
-		recv(socketFd, inputBuffer, 60, 0);
+		recv(socketFd, inputBuffer, 120, 0);
 		unserialize(inputBuffer);
+		std::cout << "xAxis: " << data.xAxis << "- yAxis: "<< data.yAxis << '\n';
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		serialize(outputBuffer);
-		send(socketFd, outputBuffer, 60, 0);
+		msglen = send(socketFd, outputBuffer, 120, 0);
+		if(msglen < 0){
+			std::cout << "Error!" << '\n';
+			break;
+		}
 	}
 	transmissionRunning = false;
 	return;

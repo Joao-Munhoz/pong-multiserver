@@ -9,7 +9,7 @@
 #include <cstring>
 #include <string>
 
-#define MAX_CONNECTIONS 6
+#define MAX_CONNECTIONS 3
 
 struct Paddles {
 	int id;
@@ -41,7 +41,7 @@ class Transmission {
 		std::thread kbThread;
 
 		//Data in struct format
-		Data data;
+		Data data, newData;
 
 		//Strings to transmit serialized data
 		char outputBuffer[120];
@@ -71,10 +71,10 @@ class Transmission {
 		void updateBall(float xAxis, float yAxis);
 		void updatePaddle(int id, int *positionPaddle);
 		void updatePaddle(int id);
+		void exchange();
 
 		//End connection
 		void stop();
-
 };
 
 #endif

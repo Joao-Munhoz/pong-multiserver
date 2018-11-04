@@ -39,7 +39,7 @@ int main(){
 	if(transmission->getSocketStatus() == false){
 		return 1;
 	}
-	//transmission->init();
+	transmission->init();
 
 	while(1){}
 
