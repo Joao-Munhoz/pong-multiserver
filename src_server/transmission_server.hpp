@@ -12,15 +12,14 @@
 #define MAX_CONNECTIONS 3
 
 struct Paddles {
-	int id;
 	int position[SIZE_PADDLE];
 };
 
 struct Data {
 	float xAxis;
 	float yAxis;
-	int positionPaddle[SIZE_PADDLE];
-	struct Paddles paddles[MAX_CONNECTIONS];
+	int id;
+	Paddles paddles[MAX_CONNECTIONS];
 	int running;
 };
 
@@ -44,8 +43,8 @@ class Transmission {
 		Data data, newData;
 
 		//Strings to transmit serialized data
-		char outputBuffer[120];
-		char inputBuffer[120];
+		char outputBuffer[300];
+		char inputBuffer[300];
 
 		pthread_t esperar_conexoes;
 		int msglen;
@@ -65,13 +64,12 @@ class Transmission {
 		bool getSocketStatus();
 
 		//Manipulate data	
-		void serialize(char *inputBuffer);
-		void unserialize(char *outputBuffer);
+		void serialize(char *buffer);
+		void unserialize(char *buffer);
 		Data getData();
 		void updateBall(float xAxis, float yAxis);
-		void updatePaddle(int id, int *positionPaddle);
-		void updatePaddle(int id);
-		void exchange();
+		void exchange(int id);
+		void exchange(int id, int off);
 
 		//End connection
 		void stop();

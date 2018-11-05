@@ -10,7 +10,7 @@
 #define MARGIN 		  2
 
 //Velocity and Size of Paddle
-#define SIZE_PADDLE			10
+#define SIZE_PADDLE			11
 #define VELOCITY_PADDLE		4
 
 //Initial and Increase Velocity

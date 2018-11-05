@@ -87,18 +87,23 @@ void Transmission::threadTransmission(){
 	std::cout << "Communicating with clients..." << '\n';
 	while (1) {	
 		std:: cout << "xAxis: " << data.xAxis << " - yAxis: " << data.yAxis << '\n';
-		for(int i = 0; i  < MAX_CONNECTIONS; i++){
+		std::cout << "Paddles positions: " << '\n';
+		for(int i = 0; i < MAX_CONNECTIONS; i++){
+			data.id = i;
 			serialize(inputBuffer);
-			send(connectionFd[i], inputBuffer, 120, 0);
+			send(connectionFd[i], inputBuffer, 300, 0);
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-			msglen = recv(connectionFd[i], outputBuffer, 120, 0);
+			msglen = recv(connectionFd[i], outputBuffer, 300, 0);
 			if(msglen < 0){
 				removeConnection(i);
-				this->updatePaddle(i);
+				exchange(i, -1);
 			}
 			unserialize(outputBuffer);
-			exchange();
-			this->updatePaddle(i, data.positionPaddle);
+			exchange(i);
+			for (int j = 0; j < SIZE_PADDLE; ++j){
+				std::cout << data.paddles[i].position[j] << ' ';
+			}
+			std::cout << '\n';
 		}
 	}
 	return;
@@ -108,18 +113,23 @@ bool Transmission::getSocketStatus() {
 	return this->socketStatus;
 }
 
-void Transmission::serialize(char *inputBuffer) {
-	std::memcpy((void*)inputBuffer, &(this->data), sizeof(Data));
+void Transmission::serialize(char *buffer) {
+	std::memcpy((void*)buffer, &(this->data), sizeof(Data));
 }
 
-void Transmission::unserialize(char *outputBuffer) {
-	std::memcpy(&(this->newData), (void*)outputBuffer, sizeof(Data));
+void Transmission::unserialize(char *buffer) {
+	std::memcpy(&(this->newData), (void*)buffer, sizeof(Data));
 }
 
-void Transmission::exchange(){
-	for (int i = 0; i < MAX_CONNECTIONS; ++i){
-		data.positionPaddle[i] = newData.positionPaddle[i];
-		data.paddles[i] = newData.paddles[i];
+void Transmission::exchange(int id){
+	for (int i = 0; i < SIZE_PADDLE; ++i){
+		data.paddles[id].position[i] = newData.paddles[id].position[i];
+	}
+}
+
+void Transmission::exchange(int id, int off){
+	for (int i = 0; i < SIZE_PADDLE; i++){
+		data.paddles[id].position[i] = off;
 	}
 }
 
@@ -131,18 +141,6 @@ void Transmission::updateBall(float xAxis, float yAxis){
 	data.xAxis = xAxis;
 	data.yAxis = yAxis;
 	return;
-}
-
-void Transmission::updatePaddle(int id, int *positionPaddle){
-	for (int i = 0; i < SIZE_PADDLE; ++i){
-		data.paddles[id].position[i] = positionPaddle[i];
-	}
-}
-
-void Transmission::updatePaddle(int id){
-	for (int i = 0; i < SIZE_PADDLE; ++i){
-		data.paddles[id].position[i] = -1;
-	}
 }
 
 void Transmission::stop(){

@@ -43,12 +43,17 @@ void Transmission::threadTransmission(){
 	std::cout << "Communicating with server..." << '\n';
 	int msglen;
 	while(1){ 
-		recv(socketFd, inputBuffer, 120, 0);
+		recv(socketFd, inputBuffer, 300, 0);
 		unserialize(inputBuffer);
 		std::cout << "xAxis: " << data.xAxis << "- yAxis: "<< data.yAxis << '\n';
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::cout << "Paddle values: ";
+		for (int i = 0; i < SIZE_PADDLE; i++){
+			std::cout << newData.paddles[data.id].position[i] << ' ';
+		}
+		std::cout << '\n';	
 		serialize(outputBuffer);
-		msglen = send(socketFd, outputBuffer, 120, 0);
+		msglen = send(socketFd, outputBuffer, 300, 0);
 		if(msglen < 0){
 			std::cout << "Error!" << '\n';
 			break;
@@ -68,17 +73,17 @@ Data Transmission::getData(){
 
 void Transmission::updatePaddle(int *positionPaddle){
 	for (int i = 0; i < SIZE_PADDLE; ++i){
-		data.positionPaddle[i] = positionPaddle[i];
+		newData.paddles[data.id].position[i] = positionPaddle[i];
 	}
 	return ;
 }
 
-void Transmission::serialize(char *inputBuffer) {
-	std::memcpy((void*)inputBuffer, &(this->data), sizeof(Data));
+void Transmission::serialize(char *buffer) {
+	std::memcpy((void*)buffer, &(this->newData), sizeof(Data));
 }
 
-void Transmission::unserialize(char *outputBuffer) {
-	std::memcpy(&(this->data), (void*)outputBuffer, sizeof(Data));
+void Transmission::unserialize(char *buffer) {
+	std::memcpy(&(this->data), (void*)buffer, sizeof(Data));
 }
 
 void Transmission::stop(){

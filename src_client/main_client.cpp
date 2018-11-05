@@ -39,6 +39,12 @@ int main(){
 	if(transmission->getSocketStatus() == false){
 		return 1;
 	}
+	int vetor[SIZE_PADDLE];
+	for (int i = 0; i < SIZE_PADDLE; ++i)
+	{
+		vetor[i] = 2;
+	}
+	transmission->updatePaddle(vetor);
 	transmission->init();
 
 	while(1){}

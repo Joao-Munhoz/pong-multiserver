@@ -12,17 +12,14 @@
 #define MAX_CONNECTIONS 6
 
 struct Paddles {
-	int id;
 	int position[SIZE_PADDLE];
 };
 
 struct Data {
 	float xAxis;
 	float yAxis;
-	int scoreTeam1;
-	int scoreTeam2;
-	int positionPaddle[SIZE_PADDLE];
-	struct Paddles paddles[MAX_CONNECTIONS];
+	int id;
+	Paddles paddles[MAX_CONNECTIONS];
 	int running;
 };
 
@@ -40,11 +37,11 @@ private:
 	std::thread kbThread;
 
 	//Data in struct format
-	Data data;
+	Data data, newData;
 
 	//Strings to transmit serialized data
-	char outputBuffer[120];
-	char inputBuffer[120];
+	char outputBuffer[300];
+	char inputBuffer[300];
 
 public:
 
@@ -58,8 +55,8 @@ public:
 
 	//Manipulate Data
 	Data getData();
-	void serialize(char *input_buffer);
-	void unserialize(char *output_buffer);
+	void serialize(char *buffer);
+	void unserialize(char *buffer);
 	void updatePaddle(int *position);
 
 	//End connection

@@ -11,7 +11,7 @@
 #define MARGIN 		  2
 
 //Velocity and Size of Bar
-#define SIZE_PADDLE		10
+#define SIZE_PADDLE		11
 #define HALF_BAR      	5
 #define VEL_BAR       	4
 
