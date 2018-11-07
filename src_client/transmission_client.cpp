@@ -47,7 +47,7 @@ void Transmission::threadTransmission(){
 		unserialize(inputBuffer);
 		std::cout << "xAxis: " << data.xAxis << "- yAxis: "<< data.yAxis << '\n';
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		std::cout << "Paddle values: ";
+		std::cout << "Paddle values: " << data.id << '\n';
 		for (int i = 0; i < SIZE_PADDLE; i++){
 			std::cout << newData.paddles[data.id].position[i] << ' ';
 		}

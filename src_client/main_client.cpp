@@ -44,10 +44,11 @@ int main(){
 	{
 		vetor[i] = 2;
 	}
-	transmission->updatePaddle(vetor);
 	transmission->init();
 
-	while(1){}
+	while(1){
+		transmission->updatePaddle(vetor);
+	}
 
 	Data newData = transmission->getData();
 	ball->update(newData.xAxis, newData.yAxis);
